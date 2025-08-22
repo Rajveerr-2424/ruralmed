@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rural Healthcare Telemedicine System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p data-key="common.loading">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Language Change Modal -->
+    <div class="modal hidden" id="languageModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3 data-key="common.info">Information</h3>
+            <p data-key="common.languageChanging">Changing language...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal hidden" id="logoutModal">
+        <div class="modal-overlay" onclick="closeLogoutModal()"></div>
+        <div class="modal-content">
+            <h3 data-key="logout.confirmTitle">Confirm Logout</h3>
+            <p data-key="logout.confirmMessage">Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn btn--primary" onclick="confirmLogout()" data-key="logout.confirm">Yes, Logout</button>
+                <button class="btn btn--outline" onclick="closeLogoutModal()" data-key="logout.cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Call Modal -->
+    <div class="modal hidden" id="videoCallModal">
+        <div class="modal-overlay" onclick="endVideoCall()"></div>
+        <div class="video-call-content">
+            <div class="video-header">
+                <h3 data-key="video.title">Video Consultation</h3>
+                <div class="call-timer" id="callTimer">00:00</div>
+            </div>
+            <div class="video-container">
+                <div class="video-main">
+                    <div class="video-placeholder">
+                        <div class="video-avatar">👨‍⚕️</div>
+                        <p>Dr. Anjali Verma</p>
+                    </div>
+                </div>
+                <div class="video-self">
+                    <div class="video-placeholder small">
+                        <div class="video-avatar">👤</div>
+                        <p>You</p>
+                    </div>
+                </div>
+            </div>
+            <div class="video-controls">
+                <button class="btn btn--outline video-btn" id="muteBtn" onclick="toggleMute()">
+                    <span class="btn-icon">🎤</span>
+                    <span data-key="video.muteAudio">Mute</span>
+                </button>
+                <button class="btn btn--outline video-btn" id="videoBtn" onclick="toggleVideo()">
+                    <span class="btn-icon">📹</span>
+                    <span data-key="video.disableVideo">Camera</span>
+                </button>
+                <button class="btn btn--primary video-btn" onclick="endVideoCall()">
+                    <span class="btn-icon">📞</span>
+                    <span data-key="video.endCall">End Call</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="language-selector-login">
+                    <select id="loginLanguageSelect" onchange="changeLanguage(this.value)">
+                        <option value="en">🇺🇸 English</option>
+                        <option value="hi">🇮🇳 हिंदी</option>
+                    </select>
+                </div>
+                <div class="app-logo">
+                    <span class="healthcare-icon">🏥</span>
+                </div>
+                <h1 data-key="auth.welcome">Welcome to Rural Healthcare</h1>
+                <p data-key="auth.tagline">Quality Healthcare, Anywhere</p>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label" data-key="auth.email">Email Address</label>
+                    <input type="email" class="form-control" id="loginEmail" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" data-key="auth.password">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn btn--primary btn--full-width" id="loginButton">
+                    <span data-key="auth.loginButton">Sign In</span>
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <h4 data-key="auth.demoAccounts">Demo Accounts</h4>
+                <div class="demo-buttons">
+                    <button class="btn btn--outline btn--sm" onclick="loginDemo('patient')">
+                        <span data-key="auth.patientDemo">Patient Demo</span>
+                    </button>
+                    <button class="btn btn--outline btn--sm" onclick="loginDemo('doctor')">
+                        <span data-key="auth.doctorDemo">Doctor Demo</span>
+                    </button>
+                    <button class="btn btn--outline btn--sm" onclick="loginDemo('admin')">
+                        <span data-key="auth.adminDemo">Admin Demo</span>
+                    </button>
+                </div>
+                <div class="demo-details">
+                    <p><strong>Patient:</strong> patient@demo.com / password123</p>
+                    <p><strong>Doctor:</strong> doctor@demo.com / password123</p>
+                    <p><strong>Admin:</strong> admin@demo.com / password123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="appContainer" class="hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="app-title" onclick="showDashboard()">
+                        <span class="healthcare-icon">🏥</span>
+                        Rural Healthcare
+                    </h1>
+                </div>
+                
+                <div class="header-right">
+                    <!-- Language Selector -->
+                    <div class="language-selector">
+                        <select id="languageSelect" onchange="changeLanguage(this.value)" class="language-dropdown">
+                            <option value="en">🇺🇸 English</option>
+                            <option value="hi">🇮🇳 हिंदी</option>
+                        </select>
+                    </div>
+                    
+                    <!-- User Profile Menu -->
+                    <div class="user-menu">
+                        <button class="user-profile-btn" onclick="toggleUserMenu()">
+                            <span class="user-avatar">👤</span>
+                            <span class="user-info">
+                                <span class="user-name" id="currentUserName">User</span>
+                                <span class="user-role" id="currentUserRole">Role</span>
+                            </span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        
+                        <div class="user-dropdown hidden" id="userDropdown">
+                            <div class="user-dropdown-header">
+                                <span class="user-name" id="dropdownUserName">User</span>
+                                <span class="user-role" id="dropdownUserRole">Role</span>
+                            </div>
+                            <ul class="user-dropdown-menu">
+                                <li><a href="#" onclick="showProfile()" data-key="nav.profile">Profile</a></li>
+                                <li><a href="#" onclick="showSettings()" data-key="nav.settings">Settings</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#" onclick="showLogoutModal()" class="logout-link" data-key="nav.logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <ul class="nav-menu" id="navMenu">
+                <!-- Navigation items will be populated based on user role -->
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Patient Dashboard -->
+            <div id="patientDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <div class="greeting-section">
+                        <h2 class="dashboard-title">
+                            <span data-key="dashboard.welcome">Welcome</span>, 
+                            <span id="patientName">Patient</span>
+                        </h2>
+                        <p class="dashboard-subtitle" id="greetingText" data-key="dashboard.goodMorning">Good Morning</p>
+                    </div>
+                    <div class="health-status">
+                        <div class="status-indicator status--success">
+                            <span data-key="dashboard.healthOverview">Health Status: Good</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Quick Actions -->
+                    <div class="card quick-actions-card">
+                        <div class="card__body">
+                            <h3 data-key="dashboard.quickActions">Quick Actions</h3>
+                            <div class="quick-actions">
+                                <button class="btn btn--primary action-btn" onclick="showBookAppointment()">
+                                    <span class="btn-icon">📅</span>
+                                    <span data-key="dashboard.bookAppointment">Book Appointment</span>
+                                </button>
+                                <button class="btn btn--outline action-btn" onclick="showSymptomChecker()">
+                                    <span class="btn-icon">🔍</span>
+                                    <span data-key="dashboard.symptomChecker">Symptom Checker</span>
+                                </button>
+                                <button class="btn btn--outline action-btn" onclick="showHealthChat()">
+                                    <span class="btn-icon">💬</span>
+                                    <span data-key="dashboard.healthChat">Health Chat</span>
+                                </button>
+                                <button class="btn btn--outline action-btn" onclick="showMedicalRecords()">
+                                    <span class="btn-icon">📋</span>
+                                    <span data-key="dashboard.medicalRecords">Medical Records</span>
+                                </button>
+                                <button class="btn btn--outline action-btn" onclick="startVideoCall()">
+                                    <span class="btn-icon">📹</span>
+                                    <span data-key="video.startCall">Video Call</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Appointments -->
+                    <div class="card appointments-card">
+                        <div class="card__body">
+                            <h3 data-key="dashboard.upcomingAppointments">Upcoming Appointments</h3>
+                            <div id="upcomingAppointments" class="appointments-list">
+                                <!-- Appointments will be populated here -->
+                            </div>
+                            <button class="btn btn--outline btn--sm" onclick="showAppointments()" data-key="dashboard.viewAll">View All</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Health Overview -->
+                    <div class="card health-overview-card">
+                        <div class="card__body">
+                            <h3 data-key="dashboard.healthOverview">Health Overview</h3>
+                            <div class="health-metrics">
+                                <div class="metric">
+                                    <span class="metric-label" data-key="medical.bloodPressure">Blood Pressure</span>
+                                    <span class="metric-value">130/85 mmHg</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label" data-key="medical.heartRate">Heart Rate</span>
+                                    <span class="metric-value">78 bpm</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label" data-key="medical.weight">Weight</span>
+                                    <span class="metric-value">68 kg</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label" data-key="medical.temperature">Temperature</span>
+                                    <span class="metric-value">98.6°F</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor Dashboard -->
+            <div id="doctorDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <div class="greeting-section">
+                        <h2 class="dashboard-title">
+                            <span data-key="dashboard.welcome">Welcome</span>, 
+                            <span id="doctorName">Doctor</span>
+                        </h2>
+                        <p class="dashboard-subtitle" id="doctorGreeting" data-key="dashboard.goodMorning">Good Morning</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.totalPatients">Total Patients</h3>
+                            <div class="stat-number">156</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.todayAppointments">Today's Appointments</h3>
+                            <div class="stat-number">8</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.completedConsultations">Completed Today</h3>
+                            <div class="stat-number">5</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-content">
+                            <h3 data-key="appointments.pending">Pending Approvals</h3>
+                            <div class="stat-number">3</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3 data-key="dashboard.todaySchedule">Today's Schedule</h3>
+                            <div id="doctorAppointments" class="appointments-list">
+                                <!-- Doctor appointments will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card__body">
+                            <h3 data-key="dashboard.patientRequests">Patient Requests</h3>
+                            <div id="pendingRequests" class="requests-list">
+                                <!-- Pending requests will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <div class="greeting-section">
+                        <h2 class="dashboard-title">
+                            <span data-key="dashboard.welcome">Welcome</span>, 
+                            <span id="adminName">Administrator</span>
+                        </h2>
+                        <p class="dashboard-subtitle">System Administration Panel</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.totalPatients">Total Patients</h3>
+                            <div class="stat-number">1,247</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍⚕️</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.totalDoctors">Total Doctors</h3>
+                            <div class="stat-number">45</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-content">
+                            <h3 data-key="dashboard.totalAppointments">Total Appointments</h3>
+                            <div class="stat-number">532</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <h3>System Usage</h3>
+                            <div class="stat-number">94%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Recent Activity</h3>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <span class="activity-icon">👨‍⚕️</span>
+                                    <span>Dr. Rajesh Kumar completed consultation</span>
+                                    <span class="activity-time">2 mins ago</span>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-icon">👤</span>
+                                    <span>New patient registration: Priya Sharma</span>
+                                    <span class="activity-time">5 mins ago</span>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-icon">📅</span>
+                                    <span>Appointment booked with Dr. Meera Patel</span>
+                                    <span class="activity-time">8 mins ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>System Health</h3>
+                            <div class="system-health">
+                                <div class="health-item">
+                                    <span class="health-label">Server Status</span>
+                                    <span class="status status--success">Online</span>
+                                </div>
+                                <div class="health-item">
+                                    <span class="health-label">Database</span>
+                                    <span class="status status--success">Connected</span>
+                                </div>
+                                <div class="health-item">
+                                    <span class="health-label">Video Service</span>
+                                    <span class="status status--success">Active</span>
+                                </div>
+                                <div class="health-item">
+                                    <span class="health-label">AI Service</span>
+                                    <span class="status status--success">Running</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Appointment Section -->
+            <div id="bookAppointmentSection" class="section hidden">
+                <div class="section-header">
+                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
+                        <span>← </span><span data-key="common.back">Back</span>
+                    </button>
+                    <h2 data-key="appointments.bookNew">Book New Appointment</h2>
+                </div>
+                
+                <div class="appointment-wizard">
+                    <div class="wizard-steps">
+                        <div class="step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span data-key="appointments.selectDoctor">Select Doctor</span>
+                        </div>
+                        <div class="step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span data-key="appointments.selectDateTime">Date & Time</span>
+                        </div>
+                        <div class="step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span data-key="appointments.confirmBooking">Confirm</span>
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-content">
+                        <!-- Step 1: Select Doctor -->
+                        <div class="wizard-step active" id="step1">
+                            <h3 data-key="appointments.selectDoctor">Select a Doctor</h3>
+                            <div class="doctors-grid" id="doctorsGrid">
+                                <!-- Doctors will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Select Date & Time -->
+                        <div class="wizard-step" id="step2">
+                            <h3 data-key="appointments.selectDateTime">Select Date & Time</h3>
+                            <div class="datetime-selection">
+                                <div class="form-group">
+                                    <label class="form-label" data-key="appointments.selectDate">Select Date</label>
+                                    <input type="date" class="form-control" id="appointmentDate" required>
+                                </div>
+                                <div class="time-slots" id="timeSlots">
+                                    <!-- Time slots will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Confirm -->
+                        <div class="wizard-step" id="step3">
+                            <h3 data-key="appointments.confirmBooking">Confirm Your Appointment</h3>
+                            <div class="appointment-summary" id="appointmentSummary">
+                                <!-- Summary will be populated here -->
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-key="appointments.purpose">Purpose of Visit</label>
+                                <input type="text" class="form-control" id="appointmentPurpose" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-key="appointments.notes">Additional Notes (Optional)</label>
+                                <textarea class="form-control" id="appointmentNotes" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-actions">
+                        <button class="btn btn--outline" id="prevBtn" onclick="prevStep()" style="display: none;">
+                            <span data-key="common.previous">Previous</span>
+                        </button>
+                        <button class="btn btn--primary" id="nextBtn" onclick="nextStep()">
+                            <span data-key="common.next">Next</span>
+                        </button>
+                        <button class="btn btn--primary" id="confirmBtn" onclick="confirmAppointment()" style="display: none;">
+                            <span data-key="appointments.confirm">Confirm Booking</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Symptom Checker Section -->
+            <div id="symptomCheckerSection" class="section hidden">
+                <div class="section-header">
+                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
+                        <span>← </span><span data-key="common.back">Back</span>
+                    </button>
+                    <h2 data-key="dashboard.symptomChecker">AI Symptom Checker</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="card__body">
+                        <div class="symptom-checker">
+                            <div class="checker-intro">
+                                <p data-key="symptoms.selectPrompt">Select your symptoms below for an AI-powered health assessment:</p>
+                            </div>
+                            
+                            <h3 data-key="medical.symptoms">Select Your Symptoms</h3>
+                            <div class="symptoms-grid" id="symptomsGrid">
+                                <!-- Symptoms will be populated here -->
+                            </div>
+                            
+                            <div class="checker-actions">
+                                <button class="btn btn--primary" onclick="analyzeSymptoms()" data-key="symptoms.analyze">Analyze Symptoms</button>
+                                <button class="btn btn--outline" onclick="clearSymptoms()" data-key="common.clear">Clear All</button>
+                            </div>
+                        </div>
+                        
+                        <div id="symptomResults" class="symptom-results hidden">
+                            <h4 data-key="symptoms.results">Analysis Results</h4>
+                            <div class="assessment-card">
+                                <div class="assessment-section">
+                                    <h5 data-key="symptoms.possibleConditions">Possible Conditions:</h5>
+                                    <div id="possibleConditions" class="conditions-list"></div>
+                                </div>
+                                <div class="assessment-section">
+                                    <h5 data-key="symptoms.recommendations">Recommendations:</h5>
+                                    <div id="recommendations" class="recommendations-list"></div>
+                                </div>
+                                <div class="assessment-actions">
+                                    <button class="btn btn--primary" onclick="bookFollowUp()">
+                                        <span data-key="appointments.bookFollowUp">Book Follow-up</span>
+                                    </button>
+                                    <button class="btn btn--outline" onclick="showHealthChat()">
+                                        <span data-key="dashboard.healthChat">Chat with AI</span>
+                                    </button>
+                                </div>
+                                <p class="disclaimer" data-key="chatbot.disclaimer">This is an AI-generated assessment. Please consult a healthcare professional for proper diagnosis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Chat Section -->
+            <div id="healthChatSection" class="section hidden">
+                <div class="section-header">
+                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
+                        <span>← </span><span data-key="common.back">Back</span>
+                    </button>
+                    <h2 data-key="dashboard.healthChat">Health Assistant</h2>
+                </div>
+                
+                <div class="chat-container-wrapper">
+                    <div class="card chat-card">
+                        <div class="chat-header">
+                            <div class="chat-info">
+                                <span class="chat-status online"></span>
+                                <span data-key="chatbot.assistant">AI Health Assistant</span>
+                            </div>
+                            <button class="btn btn--outline btn--sm" onclick="clearChat()">
+                                <span data-key="common.clear">Clear Chat</span>
+                            </button>
+                        </div>
+                        
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message bot-message">
+                                <div class="message-avatar">🤖</div>
+                                <div class="message-content" data-key="chatbot.greeting">Hello! I'm your AI health assistant. How can I help you today?</div>
+                                <div class="message-time" id="initialTime"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="typing-indicator hidden" id="typingIndicator">
+                            <div class="message-avatar">🤖</div>
+                            <div class="typing-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input-container">
+                            <div class="chat-suggestions" id="chatSuggestions">
+                                <button class="suggestion-btn" onclick="sendSuggestion('I have a headache')">I have a headache</button>
+                                <button class="suggestion-btn" onclick="sendSuggestion('Book an appointment')">Book an appointment</button>
+                                <button class="suggestion-btn" onclick="sendSuggestion('Check my symptoms')">Check my symptoms</button>
+                            </div>
+                            <div class="chat-input-wrapper">
+                                <input type="text" class="chat-input" id="chatInput" data-key="chatbot.placeholder" placeholder="Type your health question here...">
+                                <button class="btn btn--primary chat-send" onclick="sendChatMessage()" data-key="chatbot.send">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Records Section -->
+            <div id="medicalRecordsSection" class="section hidden">
+                <div class="section-header">
+                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
+                        <span>← </span><span data-key="common.back">Back</span>
+                    </button>
+                    <h2 data-key="dashboard.medicalRecords">Medical Records</h2>
+                </div>
+                
+                <div class="records-tabs">
+                    <button class="tab-btn active" onclick="showRecordTab('history')" data-key="records.history">History</button>
+                    <button class="tab-btn" onclick="showRecordTab('prescriptions')" data-key="records.prescriptions">Prescriptions</button>
+                    <button class="tab-btn" onclick="showRecordTab('reports')" data-key="records.reports">Reports</button>
+                </div>
+                
+                <div class="records-content">
+                    <div class="records-tab active" id="historyTab">
+                        <div id="medicalHistory" class="records-list">
+                            <!-- Medical history will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="records-tab" id="prescriptionsTab">
+                        <div id="prescriptionsList" class="records-list">
+                            <!-- Prescriptions will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="records-tab" id="reportsTab">
+                        <div id="reportsList" class="records-list">
+                            <!-- Reports will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments List Section -->
+            <div id="appointmentsSection" class="section hidden">
+                <div class="section-header">
+                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
+                        <span>← </span><span data-key="common.back">Back</span>
+                    </button>
+                    <h2 data-key="nav.appointments">Appointments</h2>
+                    <button class="btn btn--primary" onclick="showBookAppointment()">
+                        <span data-key="appointments.bookNew">Book New</span>
+                    </button>
+                </div>
+                
+                <div class="appointments-filters">
+                    <button class="filter-btn active" onclick="filterAppointments('all')" data-key="common.all">All</button>
+                    <button class="filter-btn" onclick="filterAppointments('upcoming')" data-key="appointments.upcoming">Upcoming</button>
+                    <button class="filter-btn" onclick="filterAppointments('completed')" data-key="appointments.completed">Completed</button>
+                    <button class="filter-btn" onclick="filterAppointments('cancelled')" data-key="appointments.cancelled">Cancelled</button>
+                </div>
+                
+                <div id="appointmentsList" class="appointments-grid">
+                    <!-- Appointments will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="messageContent">
+            <span class="message-text"></span>
+            <button class="message-close" onclick="hideMessage()">×</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

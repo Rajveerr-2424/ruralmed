@@ -1,42 +1,19 @@
 {
   "name": "rural-healthcare-system",
   "version": "1.0.0",
-  "description": "Full-stack rural healthcare telemedicine platform",
-  "private": true,
+  "description": "Rural Healthcare Telemedicine Platform",
+  "main": "index.html",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "export": "next export"
+    "dev": "python -m http.server 3000",
+    "build": "echo 'Build complete - static files ready'",
+    "start": "python -m http.server 8000"
   },
-  "dependencies": {
-    "next": "14.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "@next/font": "14.0.0",
-    "axios": "^1.6.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.0",
-    "socket.io": "^4.7.4",
-    "socket.io-client": "^4.7.4",
-    "react-hook-form": "^7.47.0",
-    "tailwindcss": "^3.3.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
-    "@heroicons/react": "^2.0.18",
-    "date-fns": "^2.30.0",
-    "react-datepicker": "^4.25.0",
-    "react-toastify": "^9.1.3",
-    "framer-motion": "^10.16.4"
-  },
-  "devDependencies": {
-    "typescript": "^5.2.2",
-    "@types/node": "^20.8.0",
-    "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.11",
-    "eslint": "^8.51.0",
-    "eslint-config-next": "14.0.0"
-  }
+  "keywords": [
+    "healthcare",
+    "telemedicine",
+    "rural",
+    "medical"
+  ],
+  "author": "Rural Healthcare Team",
+  "license": "MIT"
 }
