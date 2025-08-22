@@ -3,686 +3,645 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rural Healthcare Telemedicine System</title>
+    <title>Rural Healthcare System</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#21808D">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen hidden">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p data-key="common.loading">Loading...</p>
+    <!-- Language Selector -->
+    <div id="language-selector" class="language-selector">
+        <select id="language-select" class="form-control">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="bn">বাংলা</option>
+            <option value="te">తెలుగు</option>
+            <option value="mr">मराठी</option>
+        </select>
+    </div>
+
+    <!-- Offline Status Indicator -->
+    <div id="offline-indicator" class="offline-indicator hidden">
+        <i class="fas fa-wifi-slash"></i>
+        <span>Offline Mode - Data will sync when connected</span>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <h1>Rural Healthcare</h1>
+                </div>
+                <p class="tagline">Quality Healthcare, Anywhere</p>
+            </div>
+            
+            <div class="login-form-container">
+                <div class="login-tabs">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="register">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="login-form active">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email or Phone</label>
+                        <input type="text" id="login-email" class="form-control" placeholder="Enter your email or phone">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="user-role">I am a:</label>
+                        <select id="user-role" class="form-control">
+                            <option value="patient">Patient</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Login</button>
+                    <div class="login-options">
+                        <button type="button" class="btn-link" id="forgot-password">Forgot Password?</button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" class="form-control" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-phone">Phone Number</label>
+                        <input type="tel" id="reg-phone" class="form-control" placeholder="+91-9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-email">Email</label>
+                        <input type="email" id="reg-email" class="form-control" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Password</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="Create a password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-location">Location</label>
+                        <input type="text" id="reg-location" class="form-control" placeholder="City, State">
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Register</button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Language Change Modal -->
-    <div class="modal hidden" id="languageModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <h3 data-key="common.info">Information</h3>
-            <p data-key="common.languageChanging">Changing language...</p>
-            <div class="loading-spinner"></div>
+    <!-- Patient Dashboard -->
+    <div id="patient-dashboard" class="screen">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <div class="logo-small">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3 id="patient-name">Welcome, Patient</h3>
+                        <p class="user-subtitle">Patient Dashboard</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button id="patient-logout" class="btn btn--secondary btn--sm">Logout</button>
+                </div>
+            </header>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-action-btn" data-action="book-appointment">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Book Appointment</span>
+                </button>
+                <button class="quick-action-btn" data-action="symptom-checker">
+                    <i class="fas fa-stethoscope"></i>
+                    <span>Check Symptoms</span>
+                </button>
+                <button class="quick-action-btn" data-action="ai-chat">
+                    <i class="fas fa-robot"></i>
+                    <span>Health Chat</span>
+                </button>
+                <button class="quick-action-btn" data-action="emergency">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Emergency</span>
+                </button>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Upcoming Appointments -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h4>
+                        <div id="patient-appointments" class="appointments-list">
+                            <!-- Appointments will be populated by JavaScript -->
+                        </div>
+                        <button class="btn btn--outline btn--sm" data-action="view-all-appointments">View All</button>
+                    </div>
+                </div>
+
+                <!-- Health Status -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-heartbeat"></i> Health Status</h4>
+                        <div class="health-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Last Checkup</span>
+                                <span class="metric-value">2 weeks ago</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Blood Pressure</span>
+                                <span class="metric-value">120/80</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">BMI</span>
+                                <span class="metric-value">22.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Prescriptions -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-pills"></i> Current Medications</h4>
+                        <div id="patient-prescriptions" class="prescriptions-list">
+                            <!-- Prescriptions will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-nav="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-nav="appointments">
+                    <i class="fas fa-calendar"></i>
+                    <span>Appointments</span>
+                </button>
+                <button class="nav-item" data-nav="records">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Records</span>
+                </button>
+                <button class="nav-item" data-nav="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+            </nav>
         </div>
     </div>
 
-    <!-- Logout Confirmation Modal -->
-    <div class="modal hidden" id="logoutModal">
-        <div class="modal-overlay" onclick="closeLogoutModal()"></div>
+    <!-- Doctor Dashboard -->
+    <div id="doctor-dashboard" class="screen">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <div class="logo-small">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3 id="doctor-name">Dr. Welcome</h3>
+                        <p class="user-subtitle">Doctor Portal</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </button>
+                    <button id="doctor-logout" class="btn btn--secondary btn--sm">Logout</button>
+                </div>
+            </header>
+
+            <!-- Doctor Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="doctor-patients-count">24</h4>
+                        <p>Active Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="doctor-appointments-today">8</h4>
+                        <p>Today's Appointments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="doctor-pending-count">3</h4>
+                        <p>Pending Approvals</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Today's Appointments -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-calendar-day"></i> Today's Schedule</h4>
+                        <div id="doctor-appointments" class="appointments-list">
+                            <!-- Appointments will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Appointments -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-hourglass-half"></i> Pending Approvals</h4>
+                        <div id="doctor-pending-appointments" class="appointments-list">
+                            <!-- Pending appointments will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Patients -->
+                <div class="card">
+                    <div class="card__body">
+                        <h4><i class="fas fa-user-injured"></i> Recent Patients</h4>
+                        <div id="doctor-recent-patients" class="patients-list">
+                            <!-- Recent patients will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-nav="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-nav="patients">
+                    <i class="fas fa-users"></i>
+                    <span>Patients</span>
+                </button>
+                <button class="nav-item" data-nav="schedule">
+                    <i class="fas fa-calendar"></i>
+                    <span>Schedule</span>
+                </button>
+                <button class="nav-item" data-nav="profile">
+                    <i class="fas fa-user-md"></i>
+                    <span>Profile</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="screen">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <div class="logo-small">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>Admin Portal</h3>
+                        <p class="user-subtitle">System Administration</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button id="admin-logout" class="btn btn--secondary btn--sm">Logout</button>
+                </div>
+            </header>
+
+            <!-- Admin Stats -->
+            <div class="admin-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="total-patients">15,847</h4>
+                        <p>Total Patients</p>
+                        <span class="growth positive">+12.5%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="total-doctors">234</h4>
+                        <p>Active Doctors</p>
+                        <span class="growth positive">+8.2%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="total-appointments">8,932</h4>
+                        <p>Total Appointments</p>
+                        <span class="growth positive">+15.3%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="average-rating">4.7</h4>
+                        <p>Average Rating</p>
+                        <span class="growth positive">+0.2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Architecture -->
+            <div class="card">
+                <div class="card__body">
+                    <h4><i class="fas fa-sitemap"></i> System Architecture</h4>
+                    <div class="architecture-container">
+                        <img src="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/1996630deb6ed501139be6fb3ef7f61f/54f690a4-63f6-4cfb-8436-cf212d112e50/e62e4d92.png" alt="System Architecture Diagram" class="architecture-image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Schema -->
+            <div class="card">
+                <div class="card__body">
+                    <h4><i class="fas fa-database"></i> Database Schema</h4>
+                    <div class="schema-container">
+                        <img src="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/1996630deb6ed501139be6fb3ef7f61f/27ebbc9b-fd30-46e2-9f2b-59734d42bf2d/69d69f5e.png" alt="Database Schema Design" class="schema-image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="admin-actions">
+                <button class="admin-action-btn" data-action="manage-users">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </button>
+                <button class="admin-action-btn" data-action="system-reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>System Reports</span>
+                </button>
+                <button class="admin-action-btn" data-action="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+                <button class="admin-action-btn" data-action="backup">
+                    <i class="fas fa-download"></i>
+                    <span>Backup Data</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Booking Modal -->
+    <div id="appointment-modal" class="modal hidden">
         <div class="modal-content">
-            <h3 data-key="logout.confirmTitle">Confirm Logout</h3>
-            <p data-key="logout.confirmMessage">Are you sure you want to logout?</p>
-            <div class="modal-actions">
-                <button class="btn btn--primary" onclick="confirmLogout()" data-key="logout.confirm">Yes, Logout</button>
-                <button class="btn btn--outline" onclick="closeLogoutModal()" data-key="logout.cancel">Cancel</button>
+            <div class="modal-header">
+                <h3>Book Appointment</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="appointment-form">
+                    <div class="form-group">
+                        <label class="form-label">Select Doctor</label>
+                        <select id="appointment-doctor" class="form-control">
+                            <option value="">Choose a doctor...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Appointment Date</label>
+                        <input type="date" id="appointment-date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred Time</label>
+                        <select id="appointment-time" class="form-control">
+                            <option value="">Select time...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Purpose of Visit</label>
+                        <textarea id="appointment-purpose" class="form-control" rows="3" placeholder="Describe your symptoms or reason for visit..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn--secondary" id="cancel-appointment">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Book Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Symptom Checker Modal -->
+    <div id="symptom-checker-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AI Symptom Checker</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="symptom-checker-content">
+                    <div class="step active" id="symptom-input-step">
+                        <h4>What symptoms are you experiencing?</h4>
+                        <div class="symptoms-grid" id="symptoms-grid">
+                            <!-- Symptoms will be populated by JavaScript -->
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Additional Details</label>
+                            <textarea id="additional-symptoms" class="form-control" rows="3" placeholder="Describe any other symptoms or details..."></textarea>
+                        </div>
+                        <button class="btn btn--primary" id="analyze-symptoms">Analyze Symptoms</button>
+                    </div>
+                    
+                    <div class="step" id="symptom-results-step">
+                        <h4>Possible Conditions</h4>
+                        <div id="symptom-results">
+                            <!-- Results will be populated by JavaScript -->
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn--secondary" id="back-to-symptoms">Check Again</button>
+                            <button class="btn btn--primary" id="book-from-symptoms">Book Appointment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Modal -->
+    <div id="chatbot-modal" class="modal hidden">
+        <div class="modal-content chatbot-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-robot"></i> Health Assistant</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="chatbot-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages will be populated by JavaScript -->
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-input-field" class="form-control" placeholder="Type your health question...">
+                        <button id="send-chat" class="btn btn--primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        <button id="voice-input" class="btn btn--secondary">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Video Call Modal -->
-    <div class="modal hidden" id="videoCallModal">
-        <div class="modal-overlay" onclick="endVideoCall()"></div>
-        <div class="video-call-content">
-            <div class="video-header">
-                <h3 data-key="video.title">Video Consultation</h3>
-                <div class="call-timer" id="callTimer">00:00</div>
+    <div id="video-call-modal" class="modal hidden">
+        <div class="modal-content video-call-modal">
+            <div class="modal-header">
+                <h3 id="call-title">Video Consultation</h3>
+                <button class="modal-close">&times;</button>
             </div>
-            <div class="video-container">
-                <div class="video-main">
-                    <div class="video-placeholder">
-                        <div class="video-avatar">👨‍⚕️</div>
-                        <p>Dr. Anjali Verma</p>
+            <div class="modal-body">
+                <div class="video-call-container">
+                    <div class="video-grid">
+                        <div class="video-main">
+                            <video id="remote-video" class="video-element" autoplay muted></video>
+                            <div class="video-placeholder">
+                                <i class="fas fa-user-circle"></i>
+                                <p>Doctor Video</p>
+                            </div>
+                        </div>
+                        <div class="video-local">
+                            <video id="local-video" class="video-element" autoplay muted></video>
+                            <div class="video-placeholder-small">
+                                <i class="fas fa-user"></i>
+                                <p>You</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="video-self">
-                    <div class="video-placeholder small">
-                        <div class="video-avatar">👤</div>
-                        <p>You</p>
+                    <div class="call-controls">
+                        <button class="control-btn" id="mute-audio">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="control-btn" id="toggle-video">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="control-btn danger" id="end-call">
+                            <i class="fas fa-phone-slash"></i>
+                        </button>
+                        <button class="control-btn" id="share-screen">
+                            <i class="fas fa-desktop"></i>
+                        </button>
+                        <button class="control-btn" id="toggle-chat">
+                            <i class="fas fa-comment"></i>
+                        </button>
                     </div>
-                </div>
-            </div>
-            <div class="video-controls">
-                <button class="btn btn--outline video-btn" id="muteBtn" onclick="toggleMute()">
-                    <span class="btn-icon">🎤</span>
-                    <span data-key="video.muteAudio">Mute</span>
-                </button>
-                <button class="btn btn--outline video-btn" id="videoBtn" onclick="toggleVideo()">
-                    <span class="btn-icon">📹</span>
-                    <span data-key="video.disableVideo">Camera</span>
-                </button>
-                <button class="btn btn--primary video-btn" onclick="endVideoCall()">
-                    <span class="btn-icon">📞</span>
-                    <span data-key="video.endCall">End Call</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Login Screen -->
-    <div id="loginScreen" class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <div class="language-selector-login">
-                    <select id="loginLanguageSelect" onchange="changeLanguage(this.value)">
-                        <option value="en">🇺🇸 English</option>
-                        <option value="hi">🇮🇳 हिंदी</option>
-                    </select>
-                </div>
-                <div class="app-logo">
-                    <span class="healthcare-icon">🏥</span>
-                </div>
-                <h1 data-key="auth.welcome">Welcome to Rural Healthcare</h1>
-                <p data-key="auth.tagline">Quality Healthcare, Anywhere</p>
-            </div>
-            
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label class="form-label" data-key="auth.email">Email Address</label>
-                    <input type="email" class="form-control" id="loginEmail" required autocomplete="email">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" data-key="auth.password">Password</label>
-                    <input type="password" class="form-control" id="loginPassword" required autocomplete="current-password">
-                </div>
-                
-                <button type="submit" class="btn btn--primary btn--full-width" id="loginButton">
-                    <span data-key="auth.loginButton">Sign In</span>
-                </button>
-            </form>
-            
-            <div class="demo-credentials">
-                <h4 data-key="auth.demoAccounts">Demo Accounts</h4>
-                <div class="demo-buttons">
-                    <button class="btn btn--outline btn--sm" onclick="loginDemo('patient')">
-                        <span data-key="auth.patientDemo">Patient Demo</span>
-                    </button>
-                    <button class="btn btn--outline btn--sm" onclick="loginDemo('doctor')">
-                        <span data-key="auth.doctorDemo">Doctor Demo</span>
-                    </button>
-                    <button class="btn btn--outline btn--sm" onclick="loginDemo('admin')">
-                        <span data-key="auth.adminDemo">Admin Demo</span>
-                    </button>
-                </div>
-                <div class="demo-details">
-                    <p><strong>Patient:</strong> patient@demo.com / password123</p>
-                    <p><strong>Doctor:</strong> doctor@demo.com / password123</p>
-                    <p><strong>Admin:</strong> admin@demo.com / password123</p>
+                    <div class="call-info">
+                        <p>Call Duration: <span id="call-duration">00:00</span></p>
+                        <p>Connection: <span class="status--success">Good</span></p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Application -->
-    <div id="appContainer" class="hidden">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <div class="header-left">
-                    <h1 class="app-title" onclick="showDashboard()">
-                        <span class="healthcare-icon">🏥</span>
-                        Rural Healthcare
-                    </h1>
-                </div>
-                
-                <div class="header-right">
-                    <!-- Language Selector -->
-                    <div class="language-selector">
-                        <select id="languageSelect" onchange="changeLanguage(this.value)" class="language-dropdown">
-                            <option value="en">🇺🇸 English</option>
-                            <option value="hi">🇮🇳 हिंदी</option>
-                        </select>
-                    </div>
-                    
-                    <!-- User Profile Menu -->
-                    <div class="user-menu">
-                        <button class="user-profile-btn" onclick="toggleUserMenu()">
-                            <span class="user-avatar">👤</span>
-                            <span class="user-info">
-                                <span class="user-name" id="currentUserName">User</span>
-                                <span class="user-role" id="currentUserRole">Role</span>
-                            </span>
-                            <span class="dropdown-arrow">▼</span>
-                        </button>
-                        
-                        <div class="user-dropdown hidden" id="userDropdown">
-                            <div class="user-dropdown-header">
-                                <span class="user-name" id="dropdownUserName">User</span>
-                                <span class="user-role" id="dropdownUserRole">Role</span>
-                            </div>
-                            <ul class="user-dropdown-menu">
-                                <li><a href="#" onclick="showProfile()" data-key="nav.profile">Profile</a></li>
-                                <li><a href="#" onclick="showSettings()" data-key="nav.settings">Settings</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#" onclick="showLogoutModal()" class="logout-link" data-key="nav.logout">Logout</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+    <!-- Prescription Modal -->
+    <div id="prescription-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Write Prescription</h3>
+                <button class="modal-close">&times;</button>
             </div>
-        </header>
-
-        <!-- Navigation -->
-        <nav class="app-nav">
-            <ul class="nav-menu" id="navMenu">
-                <!-- Navigation items will be populated based on user role -->
-            </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="app-main">
-            <!-- Patient Dashboard -->
-            <div id="patientDashboard" class="dashboard hidden">
-                <div class="dashboard-header">
-                    <div class="greeting-section">
-                        <h2 class="dashboard-title">
-                            <span data-key="dashboard.welcome">Welcome</span>, 
-                            <span id="patientName">Patient</span>
-                        </h2>
-                        <p class="dashboard-subtitle" id="greetingText" data-key="dashboard.goodMorning">Good Morning</p>
+            <div class="modal-body">
+                <form id="prescription-form">
+                    <div class="form-group">
+                        <label class="form-label">Patient</label>
+                        <input type="text" id="prescription-patient" class="form-control" readonly>
                     </div>
-                    <div class="health-status">
-                        <div class="status-indicator status--success">
-                            <span data-key="dashboard.healthOverview">Health Status: Good</span>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Diagnosis</label>
+                        <textarea id="prescription-diagnosis" class="form-control" rows="2" placeholder="Enter diagnosis..."></textarea>
                     </div>
-                </div>
-                
-                <div class="dashboard-grid">
-                    <!-- Quick Actions -->
-                    <div class="card quick-actions-card">
-                        <div class="card__body">
-                            <h3 data-key="dashboard.quickActions">Quick Actions</h3>
-                            <div class="quick-actions">
-                                <button class="btn btn--primary action-btn" onclick="showBookAppointment()">
-                                    <span class="btn-icon">📅</span>
-                                    <span data-key="dashboard.bookAppointment">Book Appointment</span>
-                                </button>
-                                <button class="btn btn--outline action-btn" onclick="showSymptomChecker()">
-                                    <span class="btn-icon">🔍</span>
-                                    <span data-key="dashboard.symptomChecker">Symptom Checker</span>
-                                </button>
-                                <button class="btn btn--outline action-btn" onclick="showHealthChat()">
-                                    <span class="btn-icon">💬</span>
-                                    <span data-key="dashboard.healthChat">Health Chat</span>
-                                </button>
-                                <button class="btn btn--outline action-btn" onclick="showMedicalRecords()">
-                                    <span class="btn-icon">📋</span>
-                                    <span data-key="dashboard.medicalRecords">Medical Records</span>
-                                </button>
-                                <button class="btn btn--outline action-btn" onclick="startVideoCall()">
-                                    <span class="btn-icon">📹</span>
-                                    <span data-key="video.startCall">Video Call</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Upcoming Appointments -->
-                    <div class="card appointments-card">
-                        <div class="card__body">
-                            <h3 data-key="dashboard.upcomingAppointments">Upcoming Appointments</h3>
-                            <div id="upcomingAppointments" class="appointments-list">
-                                <!-- Appointments will be populated here -->
-                            </div>
-                            <button class="btn btn--outline btn--sm" onclick="showAppointments()" data-key="dashboard.viewAll">View All</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Health Overview -->
-                    <div class="card health-overview-card">
-                        <div class="card__body">
-                            <h3 data-key="dashboard.healthOverview">Health Overview</h3>
-                            <div class="health-metrics">
-                                <div class="metric">
-                                    <span class="metric-label" data-key="medical.bloodPressure">Blood Pressure</span>
-                                    <span class="metric-value">130/85 mmHg</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label" data-key="medical.heartRate">Heart Rate</span>
-                                    <span class="metric-value">78 bpm</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label" data-key="medical.weight">Weight</span>
-                                    <span class="metric-value">68 kg</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label" data-key="medical.temperature">Temperature</span>
-                                    <span class="metric-value">98.6°F</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Doctor Dashboard -->
-            <div id="doctorDashboard" class="dashboard hidden">
-                <div class="dashboard-header">
-                    <div class="greeting-section">
-                        <h2 class="dashboard-title">
-                            <span data-key="dashboard.welcome">Welcome</span>, 
-                            <span id="doctorName">Doctor</span>
-                        </h2>
-                        <p class="dashboard-subtitle" id="doctorGreeting" data-key="dashboard.goodMorning">Good Morning</p>
-                    </div>
-                </div>
-                
-                <div class="dashboard-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.totalPatients">Total Patients</h3>
-                            <div class="stat-number">156</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.todayAppointments">Today's Appointments</h3>
-                            <div class="stat-number">8</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.completedConsultations">Completed Today</h3>
-                            <div class="stat-number">5</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⏰</div>
-                        <div class="stat-content">
-                            <h3 data-key="appointments.pending">Pending Approvals</h3>
-                            <div class="stat-number">3</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <div class="card__body">
-                            <h3 data-key="dashboard.todaySchedule">Today's Schedule</h3>
-                            <div id="doctorAppointments" class="appointments-list">
-                                <!-- Doctor appointments will be populated here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card__body">
-                            <h3 data-key="dashboard.patientRequests">Patient Requests</h3>
-                            <div id="pendingRequests" class="requests-list">
-                                <!-- Pending requests will be populated here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin Dashboard -->
-            <div id="adminDashboard" class="dashboard hidden">
-                <div class="dashboard-header">
-                    <div class="greeting-section">
-                        <h2 class="dashboard-title">
-                            <span data-key="dashboard.welcome">Welcome</span>, 
-                            <span id="adminName">Administrator</span>
-                        </h2>
-                        <p class="dashboard-subtitle">System Administration Panel</p>
-                    </div>
-                </div>
-                
-                <div class="dashboard-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.totalPatients">Total Patients</h3>
-                            <div class="stat-number">1,247</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">👨‍⚕️</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.totalDoctors">Total Doctors</h3>
-                            <div class="stat-number">45</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-content">
-                            <h3 data-key="dashboard.totalAppointments">Total Appointments</h3>
-                            <div class="stat-number">532</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📈</div>
-                        <div class="stat-content">
-                            <h3>System Usage</h3>
-                            <div class="stat-number">94%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Recent Activity</h3>
-                            <div class="activity-list">
-                                <div class="activity-item">
-                                    <span class="activity-icon">👨‍⚕️</span>
-                                    <span>Dr. Rajesh Kumar completed consultation</span>
-                                    <span class="activity-time">2 mins ago</span>
-                                </div>
-                                <div class="activity-item">
-                                    <span class="activity-icon">👤</span>
-                                    <span>New patient registration: Priya Sharma</span>
-                                    <span class="activity-time">5 mins ago</span>
-                                </div>
-                                <div class="activity-item">
-                                    <span class="activity-icon">📅</span>
-                                    <span>Appointment booked with Dr. Meera Patel</span>
-                                    <span class="activity-time">8 mins ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>System Health</h3>
-                            <div class="system-health">
-                                <div class="health-item">
-                                    <span class="health-label">Server Status</span>
-                                    <span class="status status--success">Online</span>
-                                </div>
-                                <div class="health-item">
-                                    <span class="health-label">Database</span>
-                                    <span class="status status--success">Connected</span>
-                                </div>
-                                <div class="health-item">
-                                    <span class="health-label">Video Service</span>
-                                    <span class="status status--success">Active</span>
-                                </div>
-                                <div class="health-item">
-                                    <span class="health-label">AI Service</span>
-                                    <span class="status status--success">Running</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Book Appointment Section -->
-            <div id="bookAppointmentSection" class="section hidden">
-                <div class="section-header">
-                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
-                        <span>← </span><span data-key="common.back">Back</span>
-                    </button>
-                    <h2 data-key="appointments.bookNew">Book New Appointment</h2>
-                </div>
-                
-                <div class="appointment-wizard">
-                    <div class="wizard-steps">
-                        <div class="step active" data-step="1">
-                            <span class="step-number">1</span>
-                            <span data-key="appointments.selectDoctor">Select Doctor</span>
-                        </div>
-                        <div class="step" data-step="2">
-                            <span class="step-number">2</span>
-                            <span data-key="appointments.selectDateTime">Date & Time</span>
-                        </div>
-                        <div class="step" data-step="3">
-                            <span class="step-number">3</span>
-                            <span data-key="appointments.confirmBooking">Confirm</span>
-                        </div>
-                    </div>
-                    
-                    <div class="wizard-content">
-                        <!-- Step 1: Select Doctor -->
-                        <div class="wizard-step active" id="step1">
-                            <h3 data-key="appointments.selectDoctor">Select a Doctor</h3>
-                            <div class="doctors-grid" id="doctorsGrid">
-                                <!-- Doctors will be populated here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Step 2: Select Date & Time -->
-                        <div class="wizard-step" id="step2">
-                            <h3 data-key="appointments.selectDateTime">Select Date & Time</h3>
-                            <div class="datetime-selection">
-                                <div class="form-group">
-                                    <label class="form-label" data-key="appointments.selectDate">Select Date</label>
-                                    <input type="date" class="form-control" id="appointmentDate" required>
-                                </div>
-                                <div class="time-slots" id="timeSlots">
-                                    <!-- Time slots will be populated here -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Step 3: Confirm -->
-                        <div class="wizard-step" id="step3">
-                            <h3 data-key="appointments.confirmBooking">Confirm Your Appointment</h3>
-                            <div class="appointment-summary" id="appointmentSummary">
-                                <!-- Summary will be populated here -->
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" data-key="appointments.purpose">Purpose of Visit</label>
-                                <input type="text" class="form-control" id="appointmentPurpose" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" data-key="appointments.notes">Additional Notes (Optional)</label>
-                                <textarea class="form-control" id="appointmentNotes" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="wizard-actions">
-                        <button class="btn btn--outline" id="prevBtn" onclick="prevStep()" style="display: none;">
-                            <span data-key="common.previous">Previous</span>
-                        </button>
-                        <button class="btn btn--primary" id="nextBtn" onclick="nextStep()">
-                            <span data-key="common.next">Next</span>
-                        </button>
-                        <button class="btn btn--primary" id="confirmBtn" onclick="confirmAppointment()" style="display: none;">
-                            <span data-key="appointments.confirm">Confirm Booking</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Symptom Checker Section -->
-            <div id="symptomCheckerSection" class="section hidden">
-                <div class="section-header">
-                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
-                        <span>← </span><span data-key="common.back">Back</span>
-                    </button>
-                    <h2 data-key="dashboard.symptomChecker">AI Symptom Checker</h2>
-                </div>
-                
-                <div class="card">
-                    <div class="card__body">
-                        <div class="symptom-checker">
-                            <div class="checker-intro">
-                                <p data-key="symptoms.selectPrompt">Select your symptoms below for an AI-powered health assessment:</p>
-                            </div>
-                            
-                            <h3 data-key="medical.symptoms">Select Your Symptoms</h3>
-                            <div class="symptoms-grid" id="symptomsGrid">
-                                <!-- Symptoms will be populated here -->
-                            </div>
-                            
-                            <div class="checker-actions">
-                                <button class="btn btn--primary" onclick="analyzeSymptoms()" data-key="symptoms.analyze">Analyze Symptoms</button>
-                                <button class="btn btn--outline" onclick="clearSymptoms()" data-key="common.clear">Clear All</button>
-                            </div>
-                        </div>
-                        
-                        <div id="symptomResults" class="symptom-results hidden">
-                            <h4 data-key="symptoms.results">Analysis Results</h4>
-                            <div class="assessment-card">
-                                <div class="assessment-section">
-                                    <h5 data-key="symptoms.possibleConditions">Possible Conditions:</h5>
-                                    <div id="possibleConditions" class="conditions-list"></div>
-                                </div>
-                                <div class="assessment-section">
-                                    <h5 data-key="symptoms.recommendations">Recommendations:</h5>
-                                    <div id="recommendations" class="recommendations-list"></div>
-                                </div>
-                                <div class="assessment-actions">
-                                    <button class="btn btn--primary" onclick="bookFollowUp()">
-                                        <span data-key="appointments.bookFollowUp">Book Follow-up</span>
-                                    </button>
-                                    <button class="btn btn--outline" onclick="showHealthChat()">
-                                        <span data-key="dashboard.healthChat">Chat with AI</span>
+                    <div class="medications-section">
+                        <h4>Medications</h4>
+                        <div id="medications-list">
+                            <div class="medication-item">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control medication-name" placeholder="Medication name">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control medication-dosage" placeholder="Dosage">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control medication-frequency" placeholder="Frequency">
+                                    </div>
+                                    <button type="button" class="btn btn--secondary remove-medication">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
-                                <p class="disclaimer" data-key="chatbot.disclaimer">This is an AI-generated assessment. Please consult a healthcare professional for proper diagnosis.</p>
                             </div>
                         </div>
+                        <button type="button" id="add-medication" class="btn btn--outline">Add Medication</button>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Additional Instructions</label>
+                        <textarea id="prescription-instructions" class="form-control" rows="3" placeholder="Additional instructions for the patient..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn--secondary" id="cancel-prescription">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Save Prescription</button>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <!-- Health Chat Section -->
-            <div id="healthChatSection" class="section hidden">
-                <div class="section-header">
-                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
-                        <span>← </span><span data-key="common.back">Back</span>
-                    </button>
-                    <h2 data-key="dashboard.healthChat">Health Assistant</h2>
-                </div>
-                
-                <div class="chat-container-wrapper">
-                    <div class="card chat-card">
-                        <div class="chat-header">
-                            <div class="chat-info">
-                                <span class="chat-status online"></span>
-                                <span data-key="chatbot.assistant">AI Health Assistant</span>
-                            </div>
-                            <button class="btn btn--outline btn--sm" onclick="clearChat()">
-                                <span data-key="common.clear">Clear Chat</span>
-                            </button>
-                        </div>
-                        
-                        <div class="chat-messages" id="chatMessages">
-                            <div class="chat-message bot-message">
-                                <div class="message-avatar">🤖</div>
-                                <div class="message-content" data-key="chatbot.greeting">Hello! I'm your AI health assistant. How can I help you today?</div>
-                                <div class="message-time" id="initialTime"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="typing-indicator hidden" id="typingIndicator">
-                            <div class="message-avatar">🤖</div>
-                            <div class="typing-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                        
-                        <div class="chat-input-container">
-                            <div class="chat-suggestions" id="chatSuggestions">
-                                <button class="suggestion-btn" onclick="sendSuggestion('I have a headache')">I have a headache</button>
-                                <button class="suggestion-btn" onclick="sendSuggestion('Book an appointment')">Book an appointment</button>
-                                <button class="suggestion-btn" onclick="sendSuggestion('Check my symptoms')">Check my symptoms</button>
-                            </div>
-                            <div class="chat-input-wrapper">
-                                <input type="text" class="chat-input" id="chatInput" data-key="chatbot.placeholder" placeholder="Type your health question here...">
-                                <button class="btn btn--primary chat-send" onclick="sendChatMessage()" data-key="chatbot.send">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Medical Records Section -->
-            <div id="medicalRecordsSection" class="section hidden">
-                <div class="section-header">
-                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
-                        <span>← </span><span data-key="common.back">Back</span>
-                    </button>
-                    <h2 data-key="dashboard.medicalRecords">Medical Records</h2>
-                </div>
-                
-                <div class="records-tabs">
-                    <button class="tab-btn active" onclick="showRecordTab('history')" data-key="records.history">History</button>
-                    <button class="tab-btn" onclick="showRecordTab('prescriptions')" data-key="records.prescriptions">Prescriptions</button>
-                    <button class="tab-btn" onclick="showRecordTab('reports')" data-key="records.reports">Reports</button>
-                </div>
-                
-                <div class="records-content">
-                    <div class="records-tab active" id="historyTab">
-                        <div id="medicalHistory" class="records-list">
-                            <!-- Medical history will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <div class="records-tab" id="prescriptionsTab">
-                        <div id="prescriptionsList" class="records-list">
-                            <!-- Prescriptions will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <div class="records-tab" id="reportsTab">
-                        <div id="reportsList" class="records-list">
-                            <!-- Reports will be populated here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Appointments List Section -->
-            <div id="appointmentsSection" class="section hidden">
-                <div class="section-header">
-                    <button class="btn btn--outline btn--sm back-btn" onclick="showDashboard()">
-                        <span>← </span><span data-key="common.back">Back</span>
-                    </button>
-                    <h2 data-key="nav.appointments">Appointments</h2>
-                    <button class="btn btn--primary" onclick="showBookAppointment()">
-                        <span data-key="appointments.bookNew">Book New</span>
-                    </button>
-                </div>
-                
-                <div class="appointments-filters">
-                    <button class="filter-btn active" onclick="filterAppointments('all')" data-key="common.all">All</button>
-                    <button class="filter-btn" onclick="filterAppointments('upcoming')" data-key="appointments.upcoming">Upcoming</button>
-                    <button class="filter-btn" onclick="filterAppointments('completed')" data-key="appointments.completed">Completed</button>
-                    <button class="filter-btn" onclick="filterAppointments('cancelled')" data-key="appointments.cancelled">Cancelled</button>
-                </div>
-                
-                <div id="appointmentsList" class="appointments-grid">
-                    <!-- Appointments will be populated here -->
-                </div>
-            </div>
-        </main>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading...</p>
+        </div>
     </div>
 
     <!-- Success/Error Messages -->
-    <div id="messageContainer" class="message-container hidden">
-        <div class="message" id="messageContent">
-            <span class="message-text"></span>
-            <button class="message-close" onclick="hideMessage()">×</button>
+    <div id="message-container" class="message-container"></div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-banner" class="pwa-banner hidden">
+        <div class="pwa-content">
+            <i class="fas fa-download"></i>
+            <span>Install app for offline access</span>
+            <button id="install-app" class="btn btn--primary btn--sm">Install</button>
+            <button id="dismiss-banner" class="btn-link">Dismiss</button>
         </div>
     </div>
 
